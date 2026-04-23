@@ -942,7 +942,421 @@ var activeFilter  = 'all';   /* current sidebar filter */
    object: { id, title, category, desc, url,
    html, color, section, sectionName }
    ───────────────────────────────────────────── */
-const PREINSTALLED_APPS = [];
+const PREINSTALLED_APPS = [
+  {
+    id: "teknik_spel",
+    title: "Mattespelet",
+    category: "Matte · Logik",
+    desc: "En permanent app som alltid finns här.",
+    section: "matte",
+    color: "blue",
+    html: `<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Säkerhet på nätet - Presentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            background-color: #263238;
+            font-family: 'Lato', sans-serif;
+            overflow: hidden; /* Förhindrar scrollning utanför bilderna */
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 1280px;
+            height: 720px;
+            background-color: #FDFCF0;
+            padding: 60px;
+            display: none; /* Dölj alla utom den aktiva */
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        h1, h2, h3 {
+            color: #006064;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+        }
+
+        .slide-title {
+            font-size: 44px;
+            margin-bottom: 30px;
+            border-left: 8px solid #FF7043;
+            padding-left: 20px;
+        }
+
+        /* Navigationsknappar */
+        .nav-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background-color: #FF7043;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: #f4511e;
+            transform: scale(1.05);
+        }
+
+        .nav-btn:disabled {
+            background-color: #9e9e9e;
+            cursor: not-allowed;
+        }
+
+        .slide-number {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        /* Chat Layout */
+        .chat-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 40px;
+            align-items: center;
+            height: 100%;
+        }
+
+        .user-profile {
+            background: #fff;
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .avatar-circle {
+            width: 180px;
+            height: 180px;
+            background-color: #E0F2F1;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            color: #006064;
+        }
+
+        .chat-bubble {
+            background: #006064;
+            color: white;
+            padding: 40px;
+            border-radius: 30px 30px 30px 0;
+            font-size: 28px;
+            line-height: 1.5;
+            box-shadow: 0 10px 25px rgba(0,96,100,0.2);
+        }
+
+        .discussion-box {
+            margin-top: auto;
+            background: rgba(255, 112, 67, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #FF7043;
+            font-size: 20px;
+            color: #37474F;
+        }
+
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide h1 { font-size: 80px; }
+        .title-slide p { font-size: 30px; color: #546E7A; }
+
+        /* Anpassning för mindre skärmar vid förhandsvisning */
+        @media (max-width: 1300px) {
+            .slide {
+                width: 95%;
+                height: 90%;
+                padding: 30px;
+            }
+            .chat-layout { grid-template-columns: 1fr; }
+            .user-profile { display: none; }
+            .chat-bubble { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="presentation-container">
+    <!-- Slide 1: Startsida -->
+    <div class="slide active" id="slide-1">
+        <div class="title-slide">
+            <h1>Vad händer i chatten?</h1>
+            <p>Vi diskuterar olika meddelanden man kan få på nätet</p>
+            <div style="margin-top: 40px; font-size: 100px; color: #FF7043;">
+                <i class="fa-solid fa-comments"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Robux -->
+    <div class="slide" id="slide-2">
+        <h2 class="slide-title">Ett oväntat meddelande</h2>
+        <div class="chat-layout">
+            <div class="user-profile">
+                <div class="avatar-circle"><i class="fa-solid fa-gift"></i></div>
+                <h3>System-bot</h3>
+                <p>Okänd avsändare</p>
+            </div>
+            <div>
+                <div class="chat-bubble">
+                    "GRATTIS! Du har blivit utvald att få 5000 Robux helt gratis. Det enda du behöver göra är att klicka på länken www.free-robux-now.net och logga in med ditt lösenord. Skynda dig, erbjudandet går ut om 10 minuter!"
+                </div>
+                <div class="discussion-box">
+                    <strong>Diskutera:</strong> Varför har avsändaren bråttom? Vad händer om man klickar på länken?
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: TikTok Support -->
+    <div class="slide" id="slide-3">
+        <h2 class="slide-title">Problem med kontot?</h2>
+        <div class="chat-layout">
+            <div class="user-profile">
+                <div class="avatar-circle"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>App Support</h3>
+                <p>Varning!</p>
+            </div>
+            <div>
+                <div class="chat-bubble" style="background-color: #C62828;">
+                    "Viktigt meddelande från TikTok-supporten: Ditt konto har blivit anmält och kommer att raderas inom 24 timmar. För att stoppa detta måste du skicka en skärmdump på dina inställningar och ditt lösenord till oss direkt i det här chatten."
+                </div>
+                <div class="discussion-box">
+                    <strong>Diskutera:</strong> Frågar en riktig support efter lösenord i en chatt? Hur känns det när man läser detta?
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Nätmobbning -->
+    <div class="slide" id="slide-4">
+        <h2 class="slide-title">I gruppchatten</h2>
+        <div class="chat-layout">
+            <div class="user-profile">
+                <div class="avatar-circle"><i class="fa-solid fa-users"></i></div>
+                <h3>Gamer_King_99</h3>
+                <p>Gruppmedlem</p>
+            </div>
+            <div>
+                <div class="chat-bubble" style="background-color: #455A64;">
+                    "Varför bjöd ni in [Namn]? Ingen vill ju spela med någon som är så sämst. Vi startar en ny grupp utan hen istället, kolla era DM."
+                </div>
+                <div class="discussion-box">
+                    <strong>Diskutera:</strong> Hur känns det för den som blir utanför? Vad kan de andra i gruppen göra?
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Hot -->
+    <div class="slide" id="slide-5">
+        <h2 class="slide-title">Ett hemligt hot</h2>
+        <div class="chat-layout">
+            <div class="user-profile">
+                <div class="avatar-circle"><i class="fa-solid fa-user-secret"></i></div>
+                <h3>Anonym_User</h3>
+                <p>Privat meddelande</p>
+            </div>
+            <div>
+                <div class="chat-bubble" style="background-color: #37474F;">
+                    "Jag har sett bilden på dig från gympan. Om du inte gör som jag säger kommer jag lägga ut den så att alla i skolan kan se hur du ser ut egentligen. #fail"
+                </div>
+                <div class="discussion-box">
+                    <strong>Diskutera:</strong> Vad vill den här personen uppnå? Vem ska man prata med om man får ett sånt här hot?
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Hemlig vänskap -->
+    <div class="slide" id="slide-6">
+        <h2 class="slide-title">En ny "vän"</h2>
+        <div class="chat-layout">
+            <div class="user-profile">
+                <div class="avatar-circle"><i class="fa-solid fa-face-smile"></i></div>
+                <h3>Bästa_Vännen</h3>
+                <p>Online nu</p>
+            </div>
+            <div>
+                <div class="chat-bubble" style="background-color: #00796B;">
+                    "Du är så mycket mognare än alla andra i din klass, jag känner att jag kan prata med dig om allt. Men berätta inte för dina föräldrar att vi skriver, de skulle nog inte förstå vår vänskap. Det är väl vår lilla hemlighet?"
+                </div>
+                <div class="discussion-box">
+                    <strong>Diskutera:</strong> Varför vill personen ha hemligheter för föräldrar? Är det en bra eller dålig varningsklocka?
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Lockbete -->
+    <div class="slide" id="slide-7">
+        <h2 class="slide-title">Ett bra byte?</h2>
+        <div class="chat-layout">
+            <div class="user-profile">
+                <div class="avatar-circle"><i class="fa-solid fa-gamepad"></i></div>
+                <h3>Pro_Gamer</h3>
+                <p>Ny kontakt</p>
+            </div>
+            <div>
+                <div class="chat-bubble" style="background-color: #1565C0;">
+                    "Tjena! Grymt spelat i matchen nyss. Jag är också 12 år och bor i närheten. Vill du byta skins? Jag har massor av dyra grejer jag kan ge dig om vi hörs på Discord istället, där kan vi prata i fred utan att massa andra ser."
+                </div>
+                <div class="discussion-box">
+                    <strong>Diskutera:</strong> Varför vill personen flytta chatten till ett ställe där ingen annan ser? Kan man lita på att personen är 12 år?
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Sammanfattning -->
+    <div class="slide" id="slide-8">
+        <div class="title-slide">
+            <h2>Vad gör vi om vi ser detta?</h2>
+            <div style="display: flex; gap: 30px; margin-top: 50px; width: 100%;">
+                <div style="background: white; padding: 30px; border-radius: 20px; flex: 1;">
+                    <i class="fa-solid fa-camera" style="font-size: 40px; color: #FF7043;"></i>
+                    <h3>Skärmdump</h3>
+                    <p>Spara beviset!</p>
+                </div>
+                <div style="background: white; padding: 30px; border-radius: 20px; flex: 1;">
+                    <i class="fa-solid fa-user-slash" style="font-size: 40px; color: #FF7043;"></i>
+                    <h3>Blockera</h3>
+                    <p>Sluta svara direkt.</p>
+                </div>
+                <div style="background: white; padding: 30px; border-radius: 20px; flex: 1;">
+                    <i class="fa-solid fa-bullhorn" style="font-size: 40px; color: #FF7043;"></i>
+                    <h3>Berätta</h3>
+                    <p>Prata med en vuxen.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide-number" id="pageIndicator">Bild 1 av 8</div>
+
+<div class="nav-controls">
+    <button class="nav-btn" id="prevBtn" disabled>Föregående</button>
+    <button class="nav-btn" id="nextBtn">Nästa</button>
+</div>
+
+<script>
+    let currentSlide = 1;
+    const totalSlides = 8;
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageIndicator = document.getElementById('pageIndicator');
+
+    function updateSlides() {
+        // Dölj alla slides
+        document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+        
+        // Visa aktuell slide
+        document.getElementById(`slide-${currentSlide}`).classList.add('active');
+        
+        // Uppdatera knappar
+        prevBtn.disabled = currentSlide === 1;
+        nextBtn.disabled = currentSlide === totalSlides;
+        
+        // Uppdatera siffra
+        pageIndicator.innerText = `Bild ${currentSlide} av ${totalSlides}`;
+    }
+
+    nextBtn.addEventListener('click', () => {
+        if (currentSlide < totalSlides) {
+            currentSlide++;
+            updateSlides();
+        }
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentSlide > 1) {
+            currentSlide--;
+            updateSlides();
+        }
+    });
+
+    // Lägg till stöd för piltangenter
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlides();
+            }
+        } else if (e.key === 'ArrowLeft') {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlides();
+            }
+        }
+    });
+</script>
+
+</body>
+</html>`
+  }
+];
 
 var GRID_MAP = {
   svenska:  'grid-svenska',
