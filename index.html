@@ -934,6 +934,16 @@ var selectedColor = 'green';
 var authenticated = false;
 var activeFilter  = 'all';   /* current sidebar filter */
 
+/* ─────────────────────────────────────────────
+   PREINSTALLED APPS
+   Paste your hardcoded apps here. These are
+   read-only: no delete button, never saved to
+   localStorage. Format matches the stored app
+   object: { id, title, category, desc, url,
+   html, color, section, sectionName }
+   ───────────────────────────────────────────── */
+const PREINSTALLED_APPS = [];
+
 var GRID_MAP = {
   svenska:  'grid-svenska',
   matte:    'grid-matte',
@@ -1080,10 +1090,13 @@ function saveApps(apps) {
 }
 
 /* ═══════════════════════════════════════════
-   RENDER STORED APPS ON PAGE LOAD
+   RENDER ALL APPS ON PAGE LOAD
+   Preinstalled first (read-only), then
+   localStorage apps (editable) on top.
    ═══════════════════════════════════════════ */
 function renderStoredApps() {
-  loadApps().forEach(function (app) { appendCardToDOM(app, false); });
+  PREINSTALLED_APPS.forEach(function (app) { appendCardToDOM(app, false, true); });
+  loadApps().forEach(function (app)        { appendCardToDOM(app, false, false); });
   updateAllCounts();
 }
 
@@ -1109,14 +1122,18 @@ function launchStoredHtml(id) {
 
 /* ═══════════════════════════════════════════
    BUILD & INSERT A CARD INTO THE DOM
+   isPreinstalled = true  → no delete button
+   isPreinstalled = false → delete button shown
+                           (for auth-only users)
+   persist        = true  → save to localStorage
    ═══════════════════════════════════════════ */
-function appendCardToDOM(app, persist) {
+function appendCardToDOM(app, persist, isPreinstalled) {
   var hasHtml = app.html && app.html.trim().length > 0;
   var color   = app.color || 'green';
 
   var card = document.createElement('div');
-  card.className      = 'app-card stripe-' + color;
-  card.dataset.id     = app.id;
+  card.className       = 'app-card stripe-' + color;
+  card.dataset.id      = app.id;
   card.dataset.section = app.section;
 
   var launchBtn = hasHtml
@@ -1124,8 +1141,13 @@ function appendCardToDOM(app, persist) {
       '<span class="card-html-badge">HTML</span></button>'
     : '<button class="btn-launch" onclick="launchUrl(\'' + esc(app.url || '#') + '\')">Öppna verktyg </button>';
 
+  /* Delete button only for user-added (non-preinstalled) cards */
+  var deleteBtn = isPreinstalled
+    ? ''
+    : '<button class="card-delete auth-only" title="Ta bort" onclick="deleteCard(this,\'' + app.id + '\')">✕</button>';
+
   card.innerHTML =
-    '<button class="card-delete auth-only" title="Ta bort" onclick="deleteCard(this,\'' + app.id + '\')">✕</button>' +
+    deleteBtn +
     '<div class="card-category">' + esc(app.category || 'Verktyg') + '</div>' +
     '<div class="card-title">'    + esc(app.title)                  + '</div>' +
     (app.desc ? '<div class="card-desc">' + esc(app.desc) + '</div>' : '') +
@@ -1296,7 +1318,7 @@ function submitAddApp() {
     color:       selectedColor,
     section:     sectionKey,
     sectionName: (section === 'ny') ? newSecName : null
-  }, true);
+  }, true, false);
 
   closeAddApp();
 }
@@ -1444,7 +1466,7 @@ function importData(event) {
       var existing    = loadApps();
       var existingIds = existing.map(function (a) { return a.id; });
       var fresh       = apps.filter(function (a) { return !existingIds.includes(a.id); });
-      fresh.forEach(function (app) { existing.push(app); appendCardToDOM(app, false); });
+      fresh.forEach(function (app) { existing.push(app); appendCardToDOM(app, false, false); });
       saveApps(existing);
       updateAllCounts();
       var activeEl = document.querySelector('.sidebar-cat.active');
