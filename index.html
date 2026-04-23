@@ -770,23 +770,8 @@ body {
           <span class="col-title">Svenska</span>
           <span class="col-count" id="count-svenska">0</span>
         </div>
-        <div class="col-cards" id="grid-svenska">
-          <div class="app-card stripe-green" data-id="static-sv-1" data-section="svenska">
-            <button class="card-delete auth-only" onclick="deleteCard(this,'static-sv-1')" style="display:none;">✕</button>
-            <div class="card-category">Skrivövning · Lektionsverktyg</div>
-            <div class="card-title">Källkritik Studio</div>
-            <div class="card-desc">Analysera och granska texter med eleverna.</div>
-            <button class="btn-launch" onclick="launchUrl('#')">Öppna verktyg </button>
-          </div>
-          <div class="app-card stripe-teal" data-id="static-sv-2" data-section="svenska">
-            <button class="card-delete auth-only" onclick="deleteCard(this,'static-sv-2')" style="display:none;">✕</button>
-            <div class="card-category">Läsförståelse · Quiz</div>
-            <div class="card-title">TextQuiz</div>
-            <div class="card-desc">Skapa frågor kopplade till faktatexter.</div>
-            <button class="btn-launch" onclick="launchUrl('#')">Öppna verktyg </button>
-          </div>
-        </div>
-        <div class="col-empty" id="empty-svenska">
+        <div class="col-cards" id="grid-svenska"></div>
+        <div class="col-empty visible" id="empty-svenska">
           <div class="col-empty-icon">📂</div>
           <p>Inga verktyg tillagda i denna kategori än.</p>
         </div>
@@ -798,23 +783,8 @@ body {
           <span class="col-title">Matte</span>
           <span class="col-count" id="count-matte">0</span>
         </div>
-        <div class="col-cards" id="grid-matte">
-          <div class="app-card stripe-blue" data-id="static-ma-1" data-section="matte">
-            <button class="card-delete auth-only" onclick="deleteCard(this,'static-ma-1')" style="display:none;">✕</button>
-            <div class="card-category">Algebra · Spel</div>
-            <div class="card-title">Mattespelet</div>
-            <div class="card-desc">Träna algebra och ekvationer genom spel.</div>
-            <button class="btn-launch" onclick="launchUrl('#')">Öppna verktyg </button>
-          </div>
-          <div class="app-card stripe-blue" data-id="static-ma-2" data-section="matte">
-            <button class="card-delete auth-only" onclick="deleteCard(this,'static-ma-2')" style="display:none;">✕</button>
-            <div class="card-category">Statistik · Visualisering</div>
-            <div class="card-title">DiagramLabb</div>
-            <div class="card-desc">Skapa och tolka diagram med klassen.</div>
-            <button class="btn-launch" onclick="launchUrl('#')">Öppna verktyg </button>
-          </div>
-        </div>
-        <div class="col-empty" id="empty-matte">
+        <div class="col-cards" id="grid-matte"></div>
+        <div class="col-empty visible" id="empty-matte">
           <div class="col-empty-icon">📂</div>
           <p>Inga verktyg tillagda i denna kategori än.</p>
         </div>
@@ -826,16 +796,8 @@ body {
           <span class="col-title">Engelska</span>
           <span class="col-count" id="count-engelska">0</span>
         </div>
-        <div class="col-cards" id="grid-engelska">
-          <div class="app-card stripe-amber" data-id="static-en-1" data-section="engelska">
-            <button class="card-delete auth-only" onclick="deleteCard(this,'static-en-1')" style="display:none;">✕</button>
-            <div class="card-category">Ordförråd · Interaktivt</div>
-            <div class="card-title">Ordbyggaren</div>
-            <div class="card-desc">Bygg och utforska engelska ordförråd interaktivt.</div>
-            <button class="btn-launch" onclick="launchUrl('#')">Öppna verktyg </button>
-          </div>
-        </div>
-        <div class="col-empty" id="empty-engelska">
+        <div class="col-cards" id="grid-engelska"></div>
+        <div class="col-empty visible" id="empty-engelska">
           <div class="col-empty-icon">📂</div>
           <p>Inga verktyg tillagda i denna kategori än.</p>
         </div>
@@ -847,23 +809,8 @@ body {
           <span class="col-title">Naturvetenskap</span>
           <span class="col-count" id="count-natur">0</span>
         </div>
-        <div class="col-cards" id="grid-natur">
-          <div class="app-card stripe-rose" data-id="static-na-1" data-section="natur">
-            <button class="card-delete auth-only" onclick="deleteCard(this,'static-na-1')" style="display:none;">✕</button>
-            <div class="card-category">Kemi · Periodiska systemet</div>
-            <div class="card-title">Elementutforskaren</div>
-            <div class="card-desc">Interaktivt periodiskt system för lektionen.</div>
-            <button class="btn-launch" onclick="launchUrl('#')">Öppna verktyg </button>
-          </div>
-          <div class="app-card stripe-purple" data-id="static-na-2" data-section="natur">
-            <button class="card-delete auth-only" onclick="deleteCard(this,'static-na-2')" style="display:none;">✕</button>
-            <div class="card-category">Biologi · Diagram</div>
-            <div class="card-title">Cellritaren</div>
-            <div class="card-desc">Märk och studera cellstrukturer.</div>
-            <button class="btn-launch" onclick="launchUrl('#')">Öppna verktyg </button>
-          </div>
-        </div>
-        <div class="col-empty" id="empty-natur">
+        <div class="col-cards" id="grid-natur"></div>
+        <div class="col-empty visible" id="empty-natur">
           <div class="col-empty-icon">📂</div>
           <p>Inga verktyg tillagda i denna kategori än.</p>
         </div>
@@ -1205,6 +1152,8 @@ function appendCardToDOM(app, persist) {
    DELETE CARD
    ═══════════════════════════════════════════ */
 function deleteCard(btn, id) {
+  if (!confirm('Är du säker på att du vill radera denna app? Detta går inte att ångra.')) return;
+
   var card   = btn.closest('.app-card');
   var gridId = card.closest('.col-cards') ? card.closest('.col-cards').id : null;
 
