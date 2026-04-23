@@ -57,26 +57,6 @@ body {
 }
 
 /* ════════════════════════════════════════
-   ACCESS DENIED
-   ════════════════════════════════════════ */
-#access-denied {
-  display: none;
-  position: fixed; inset: 0;
-  background: var(--bg);
-  background-image: var(--bg-grain);
-  align-items: center; justify-content: center;
-  flex-direction: column; gap: 10px;
-  z-index: 9999;
-}
-#access-denied h2 {
-  font-family: var(--serif);
-  font-size: 2rem;
-  color: var(--rose);
-  font-weight: 400;
-}
-#access-denied p { color: var(--text-mid); font-size: 0.9rem; }
-
-/* ════════════════════════════════════════
    APP SHELL
    ════════════════════════════════════════ */
 #app { display: flex; width: 100%; min-height: 100vh; }
@@ -691,12 +671,6 @@ body {
 </head>
 <body>
 
-<!-- ACCESS DENIED -->
-<div id="access-denied">
-  <h2>Åtkomst nekad</h2>
-  <p>Felaktigt lösenord. Ladda om sidan och försök igen.</p>
-</div>
-
 <!-- APP SHELL -->
 <div id="app">
 
@@ -959,15 +933,9 @@ var SECTION_LABELS = {
 };
 
 /* ═══════════════════════════════════════════
-   PASSWORD GATE
+   INITIALISE
    ═══════════════════════════════════════════ */
 (function () {
-  var key = prompt('Ange portalnyckeln…');
-  if (key !== 'teacherapp') {
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('access-denied').style.display = 'flex';
-    return;
-  }
   authenticated = true;
   document.querySelectorAll('.auth-only').forEach(function (el) {
     el.style.display = '';
