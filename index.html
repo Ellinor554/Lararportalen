@@ -1131,6 +1131,14 @@ function launchStoredHtml(id) {
   if (app && app.html) launchHtml(app.html);
 }
 
+function findCardById(id) {
+  var cards = document.querySelectorAll('.app-card');
+  for (var i = 0; i < cards.length; i++) {
+    if (cards[i].dataset.id === id) return cards[i];
+  }
+  return null;
+}
+
 /* ═══════════════════════════════════════════
    BUILD & INSERT A CARD INTO THE DOM
    isPreinstalled = true  → no delete button
@@ -1339,8 +1347,12 @@ function openEditApp(id) {
   document.getElementById('new-url').value = app.url || '';
   document.getElementById('new-html').value = app.html || '';
 
-  if (app.section && document.getElementById('new-section').querySelector('option[value="' + app.section + '"]')) {
-    document.getElementById('new-section').value = app.section;
+  var sectionSelect = document.getElementById('new-section');
+  var hasSectionOption = Array.prototype.some.call(sectionSelect.options, function (opt) {
+    return opt.value === app.section;
+  });
+  if (app.section && hasSectionOption) {
+    sectionSelect.value = app.section;
   }
 
   selectedColor = app.color || 'green';
@@ -1390,7 +1402,7 @@ function submitAddApp() {
     apps[idx] = appPayload;
     saveApps(apps);
 
-    var oldCard = document.querySelector('.app-card[data-id="' + editingAppId + '"]');
+    var oldCard = findCardById(editingAppId);
     if (oldCard) {
       var oldGrid = oldCard.closest('.col-cards');
       oldCard.remove();
