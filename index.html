@@ -463,6 +463,27 @@ body {
   line-height: 1.3;
   margin-bottom: 5px;
 }
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.card-title-row .card-title {
+  margin-bottom: 0;
+}
+.card-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(0,0,0,0.06);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
 .card-desc {
   font-size: 0.76rem;
   color: var(--text-mid);
@@ -517,6 +538,23 @@ body {
   z-index: 2;
 }
 .card-delete:hover { color: var(--rose); background: var(--rose-pale); border-color: var(--rose); }
+.card-edit {
+  position: absolute;
+  top: 9px; right: 33px;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid var(--border-solid);
+  border-radius: 50%;
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 0.65rem;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  z-index: 2;
+}
+.card-edit:hover { color: var(--blue); background: var(--blue-pale); border-color: var(--blue); }
+.app-card:hover .card-edit { opacity: 1; }
 
 /* ════════════════════════════════════════
    MODALS
@@ -809,13 +847,17 @@ body {
 <div id="addapp-modal" class="modal-overlay">
   <div class="modal-box">
     <button class="modal-close" onclick="closeAddApp()">✕</button>
-    <h2>Lägg till app</h2>
-    <p class="modal-subtitle">Fyll i uppgifterna och klistra in HTML-koden nedan.</p>
+    <h2 id="addapp-title">Lägg till app</h2>
+    <p class="modal-subtitle" id="addapp-subtitle">Fyll i uppgifterna och klistra in HTML-koden nedan.</p>
     <div class="modal-divider"></div>
 
     <div class="form-group">
       <label>Appens namn *</label>
       <input type="text" id="new-title" placeholder="t.ex. Mattespelet">
+    </div>
+    <div class="form-group">
+      <label>Ikon</label>
+      <input type="text" id="new-icon" placeholder="t.ex. 📚">
     </div>
     <div class="form-group">
       <label>Kategori / typ</label>
@@ -861,7 +903,7 @@ body {
 
     <div style="display:flex; gap:10px; margin-top:26px; justify-content:flex-end; align-items:center;">
       <button class="btn-cancel" onclick="closeAddApp()">Avbryt</button>
-      <button class="btn-pill btn-pill-solid" onclick="submitAddApp()">Spara app</button>
+      <button class="btn-pill btn-pill-solid" id="addapp-submit-btn" onclick="submitAddApp()">Spara app</button>
     </div>
   </div>
 </div>
@@ -905,6 +947,7 @@ body {
    ═══════════════════════════════════════════ */
 var STORAGE_KEY   = 'lararportalen_apps_v2';
 var selectedColor = 'green';
+var editingAppId  = null;
 var authenticated = false;
 var activeFilter  = 'all';   /* current sidebar filter */
 
@@ -913,8 +956,8 @@ var activeFilter  = 'all';   /* current sidebar filter */
    Paste your hardcoded apps here. These are
    read-only: no delete button, never saved to
    localStorage. Format matches the stored app
-   object: { id, title, category, desc, url,
-   html, color, section, sectionName }
+   object: { id, title, icon, category, desc,
+   url, html, color, section, sectionName }
    ───────────────────────────────────────────── */
 const PREINSTALLED_APPS = [];
 
@@ -1088,6 +1131,14 @@ function launchStoredHtml(id) {
   if (app && app.html) launchHtml(app.html);
 }
 
+function findCardById(id) {
+  var cards = document.querySelectorAll('.app-card');
+  for (var i = 0; i < cards.length; i++) {
+    if (cards[i].dataset.id === id) return cards[i];
+  }
+  return null;
+}
+
 /* ═══════════════════════════════════════════
    BUILD & INSERT A CARD INTO THE DOM
    isPreinstalled = true  → no delete button
@@ -1098,6 +1149,7 @@ function launchStoredHtml(id) {
 function appendCardToDOM(app, persist, isPreinstalled) {
   var hasHtml = app.html && app.html.trim().length > 0;
   var color   = app.color || 'green';
+  var icon    = (app.icon || '').trim() || '🌐';
 
   var card = document.createElement('div');
   card.className       = 'app-card stripe-' + color;
@@ -1110,14 +1162,16 @@ function appendCardToDOM(app, persist, isPreinstalled) {
     : '<button class="btn-launch" onclick="launchUrl(\'' + esc(app.url || '#') + '\')">Öppna verktyg </button>';
 
   /* Delete button only for user-added (non-preinstalled) cards */
-  var deleteBtn = isPreinstalled
+  var cardActions = isPreinstalled
     ? ''
-    : '<button class="card-delete auth-only" title="Ta bort" onclick="deleteCard(this,\'' + app.id + '\')">✕</button>';
+    : '<button class="card-edit auth-only" title="Redigera" onclick="openEditApp(\'' + app.id + '\')">✎</button>' +
+      '<button class="card-delete auth-only" title="Ta bort" onclick="deleteCard(this,\'' + app.id + '\')">✕</button>';
 
   card.innerHTML =
-    deleteBtn +
+    cardActions +
     '<div class="card-category">' + esc(app.category || 'Verktyg') + '</div>' +
-    '<div class="card-title">'    + esc(app.title)                  + '</div>' +
+    '<div class="card-title-row"><span class="card-icon">' + esc(icon) + '</span>' +
+      '<div class="card-title">' + esc(app.title) + '</div></div>' +
     (app.desc ? '<div class="card-desc">' + esc(app.desc) + '</div>' : '') +
     launchBtn;
 
@@ -1235,17 +1289,36 @@ function resolveGrid(section, sectionName) {
 /* ═══════════════════════════════════════════
    ADD APP MODAL
    ═══════════════════════════════════════════ */
-function openAddApp()  { document.getElementById('addapp-modal').classList.add('open'); }
+function setModalEditState(isEdit) {
+  document.getElementById('addapp-title').textContent = isEdit ? 'Redigera app' : 'Lägg till app';
+  document.getElementById('addapp-subtitle').textContent = isEdit
+    ? 'Uppdatera ikon, färg och innehåll för appen.'
+    : 'Fyll i uppgifterna och klistra in HTML-koden nedan.';
+  document.getElementById('addapp-submit-btn').textContent = isEdit ? 'Spara ändringar' : 'Spara app';
+}
 
-function closeAddApp() {
-  document.getElementById('addapp-modal').classList.remove('open');
-  ['new-title','new-category','new-desc','new-url','new-section-name','new-html']
+function resetAddAppForm() {
+  ['new-title','new-icon','new-category','new-desc','new-url','new-section-name','new-html']
     .forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('new-section').value = 'svenska';
   document.getElementById('new-section-name-wrap').style.display = 'none';
   selectedColor = 'green';
   document.querySelectorAll('.cp-dot').forEach(function (d) { d.classList.remove('selected'); });
   document.querySelector('.cp-dot[data-color="green"]').classList.add('selected');
+}
+
+function openAddApp()  {
+  editingAppId = null;
+  setModalEditState(false);
+  resetAddAppForm();
+  document.getElementById('addapp-modal').classList.add('open');
+}
+
+function closeAddApp() {
+  document.getElementById('addapp-modal').classList.remove('open');
+  editingAppId = null;
+  setModalEditState(false);
+  resetAddAppForm();
 }
 
 function pickColor(el) {
@@ -1259,8 +1332,41 @@ document.getElementById('new-section').addEventListener('change', function () {
     this.value === 'ny' ? '' : 'none';
 });
 
+function openEditApp(id) {
+  var app = loadApps().find(function (a) { return a.id === id; });
+  if (!app) return;
+
+  editingAppId = id;
+  setModalEditState(true);
+  resetAddAppForm();
+
+  document.getElementById('new-title').value = app.title || '';
+  document.getElementById('new-icon').value = app.icon || '';
+  document.getElementById('new-category').value = app.category || '';
+  document.getElementById('new-desc').value = app.desc || '';
+  document.getElementById('new-url').value = app.url || '';
+  document.getElementById('new-html').value = app.html || '';
+
+  var sectionSelect = document.getElementById('new-section');
+  var hasSectionOption = Array.prototype.some.call(sectionSelect.options, function (opt) {
+    return opt.value === app.section;
+  });
+  if (app.section && hasSectionOption) {
+    sectionSelect.value = app.section;
+  }
+
+  selectedColor = app.color || 'green';
+  document.querySelectorAll('.cp-dot').forEach(function (d) {
+    d.classList.toggle('selected', d.dataset.color === selectedColor);
+  });
+
+  document.getElementById('new-section-name-wrap').style.display = 'none';
+  document.getElementById('addapp-modal').classList.add('open');
+}
+
 function submitAddApp() {
   var title      = document.getElementById('new-title').value.trim();
+  var icon       = document.getElementById('new-icon').value.trim();
   var category   = document.getElementById('new-category').value.trim();
   var desc       = document.getElementById('new-desc').value.trim();
   var url        = document.getElementById('new-url').value.trim();
@@ -1276,9 +1382,10 @@ function submitAddApp() {
     sectionKey = 'custom_' + newSecName;
   }
 
-  appendCardToDOM({
-    id:          'app_' + Date.now(),
+  var appPayload = {
+    id:          editingAppId || ('app_' + Date.now()),
     title:       title,
+    icon:        icon,
     category:    category,
     desc:        desc,
     url:         url || '#',
@@ -1286,7 +1393,29 @@ function submitAddApp() {
     color:       selectedColor,
     section:     sectionKey,
     sectionName: (section === 'ny') ? newSecName : null
-  }, true, false);
+  };
+
+  if (editingAppId) {
+    var apps = loadApps();
+    var idx  = apps.findIndex(function (a) { return a.id === editingAppId; });
+    if (idx === -1) { alert('Appen kunde inte hittas.'); return; }
+    apps[idx] = appPayload;
+    saveApps(apps);
+
+    var oldCard = findCardById(editingAppId);
+    if (oldCard) {
+      var oldGrid = oldCard.closest('.col-cards');
+      oldCard.remove();
+      if (oldGrid) updateCount(oldGrid.id);
+    }
+
+    appendCardToDOM(appPayload, false, false);
+    updateSidebarCounts();
+    var activeEl = document.querySelector('.sidebar-cat.active');
+    applyFilter(activeFilter, activeEl);
+  } else {
+    appendCardToDOM(appPayload, true, false);
+  }
 
   closeAddApp();
 }
