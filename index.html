@@ -555,6 +555,23 @@ body {
 }
 .card-edit:hover { color: var(--blue); background: var(--blue-pale); border-color: var(--blue); }
 .app-card:hover .card-edit { opacity: 1; }
+.card-hide {
+  position: absolute;
+  top: 9px; right: 9px;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid var(--border-solid);
+  border-radius: 50%;
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 0.65rem;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  z-index: 2;
+}
+.card-hide:hover { color: var(--amber); background: var(--amber-pale); border-color: var(--amber); }
+.app-card:hover .card-hide { opacity: 1; }
 
 /* ════════════════════════════════════════
    MODALS
@@ -932,7 +949,7 @@ body {
     <div class="modal-divider" style="margin-top:28px;"></div>
     <p style="font-size:0.71rem; font-weight:600; letter-spacing:0.09em; color:var(--text-mid); text-transform:uppercase; margin-top:18px;">Hantera ämnen</p>
     <p style="color:var(--text-mid); font-size:0.82rem; line-height:1.6; margin-top:6px; margin-bottom:14px;">
-      Inbyggda ämnen (Svenska, Matte, Engelska, Naturvetenskap) kan inte tas bort. Egna ämnen och alla verktyg i dem raderas permanent.
+      Inbyggda ämnen kan döljas och visas igen. Egna ämnen och alla verktyg i dem raderas permanent.
     </p>
     <div id="settings-category-list" style="display:flex; flex-direction:column; gap:8px;"></div>
 
@@ -946,7 +963,9 @@ body {
 /* ═══════════════════════════════════════════
    CONSTANTS & STATE
    ═══════════════════════════════════════════ */
-var STORAGE_KEY   = 'lararportalen_apps_v2';
+var STORAGE_KEY         = 'lararportalen_apps_v2';
+var HIDDEN_APPS_KEY     = 'lararportalen_hidden_apps_v1';
+var HIDDEN_SECTIONS_KEY = 'lararportalen_hidden_sections_v1';
 var selectedColor = 'green';
 var editingAppId  = null;
 var authenticated = false;
@@ -1092,6 +1111,16 @@ function loadApps() {
 function saveApps(apps) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
 }
+function loadHiddenApps() {
+  try { return JSON.parse(localStorage.getItem(HIDDEN_APPS_KEY)) || []; }
+  catch (e) { return []; }
+}
+function saveHiddenApps(ids) { localStorage.setItem(HIDDEN_APPS_KEY, JSON.stringify(ids)); }
+function loadHiddenSections() {
+  try { return JSON.parse(localStorage.getItem(HIDDEN_SECTIONS_KEY)) || []; }
+  catch (e) { return []; }
+}
+function saveHiddenSections(keys) { localStorage.setItem(HIDDEN_SECTIONS_KEY, JSON.stringify(keys)); }
 
 /* ═══════════════════════════════════════════
    RENDER ALL APPS ON PAGE LOAD
@@ -1099,12 +1128,24 @@ function saveApps(apps) {
    localStorage apps (editable) on top.
    ═══════════════════════════════════════════ */
 function renderStoredApps() {
-  var preinstalledIds = PREINSTALLED_APPS.map(function (a) { return a.id; });
-  PREINSTALLED_APPS.forEach(function (app) { appendCardToDOM(app, false, true); });
+  var preinstalledIds  = PREINSTALLED_APPS.map(function (a) { return a.id; });
+  var hiddenApps       = loadHiddenApps();
+  var hiddenSections   = loadHiddenSections();
+
+  PREINSTALLED_APPS
+    .filter(function (app) { return !hiddenApps.includes(app.id); })
+    .forEach(function (app) { appendCardToDOM(app, false, true); });
   loadApps()
-    .filter(function (app) { return !preinstalledIds.includes(app.id); })
+    .filter(function (app) { return !preinstalledIds.includes(app.id) && !hiddenApps.includes(app.id); })
     .forEach(function (app) { appendCardToDOM(app, false, false); });
   updateAllCounts();
+
+  hiddenSections.forEach(function (key) {
+    var col = document.getElementById('col-' + key);
+    if (col) col.style.display = 'none';
+    var sidebarEl = document.querySelector('.sidebar-cat[data-filter="' + key + '"]');
+    if (sidebarEl) sidebarEl.style.display = 'none';
+  });
 }
 
 /* ═══════════════════════════════════════════
@@ -1158,9 +1199,8 @@ function appendCardToDOM(app, persist, isPreinstalled) {
       '<span class="card-html-badge">HTML</span></button>'
     : '<button class="btn-launch" onclick="launchUrl(\'' + esc(app.url || '#') + '\')">Öppna verktyg </button>';
 
-  /* Delete button only for user-added (non-preinstalled) cards */
   var cardActions = isPreinstalled
-    ? ''
+    ? '<button class="card-hide" title="Dölj" onclick="hideApp(\'' + app.id + '\')">✕</button>'
     : '<button class="card-edit auth-only" title="Redigera" onclick="openEditApp(\'' + app.id + '\')">✎</button>' +
       '<button class="card-delete auth-only" title="Ta bort" onclick="deleteCard(this,\'' + app.id + '\')">✕</button>';
 
@@ -1187,6 +1227,60 @@ function appendCardToDOM(app, persist, isPreinstalled) {
     var activeEl = document.querySelector('.sidebar-cat.active');
     applyFilter(activeFilter, activeEl);
   }
+}
+
+/* ═══════════════════════════════════════════
+   HIDE / RESTORE PREINSTALLED APP
+   ═══════════════════════════════════════════ */
+function hideApp(id) {
+  var hidden = loadHiddenApps();
+  if (!hidden.includes(id)) { hidden.push(id); saveHiddenApps(hidden); }
+  var card = findCardById(id);
+  if (card) {
+    card.style.transition = 'opacity 0.2s, transform 0.2s';
+    card.style.opacity    = '0';
+    card.style.transform  = 'scale(0.93)';
+    setTimeout(function () {
+      var grid = card.closest('.col-cards');
+      card.remove();
+      if (grid) updateCount(grid.id);
+      updateSidebarCounts();
+      var activeEl = document.querySelector('.sidebar-cat.active');
+      applyFilter(activeFilter, activeEl);
+    }, 210);
+  }
+}
+
+function restoreApp(id) {
+  var hidden = loadHiddenApps().filter(function (i) { return i !== id; });
+  saveHiddenApps(hidden);
+  var app = PREINSTALLED_APPS.find(function (a) { return a.id === id; });
+  if (app) { appendCardToDOM(app, false, true); }
+  closeSettings();
+  setTimeout(openSettings, 50);
+}
+
+/* ═══════════════════════════════════════════
+   TOGGLE SECTION VISIBILITY
+   ═══════════════════════════════════════════ */
+function toggleSection(key) {
+  var hidden = loadHiddenSections();
+  var idx    = hidden.indexOf(key);
+  if (idx === -1) { hidden.push(key); } else { hidden.splice(idx, 1); }
+  saveHiddenSections(hidden);
+
+  var isNowHidden = hidden.includes(key);
+  var col       = document.getElementById('col-' + key);
+  var sidebarEl = document.querySelector('.sidebar-cat[data-filter="' + key + '"]');
+  if (col)       col.style.display       = isNowHidden ? 'none' : '';
+  if (sidebarEl) sidebarEl.style.display = isNowHidden ? 'none' : '';
+
+  if (activeFilter === key && isNowHidden) {
+    applyFilter('all', document.querySelector('[data-filter="all"]'));
+  }
+
+  closeSettings();
+  setTimeout(openSettings, 50);
 }
 
 /* ═══════════════════════════════════════════
@@ -1425,11 +1519,12 @@ document.getElementById('addapp-modal').addEventListener('click', function (e) {
    SETTINGS MODAL
    ═══════════════════════════════════════════ */
 function openSettings() {
-  /* Rebuild the category list every time the modal opens */
-  var list = document.getElementById('settings-category-list');
+  var list           = document.getElementById('settings-category-list');
+  var hiddenSections = loadHiddenSections();
+  var hiddenApps     = loadHiddenApps();
   list.innerHTML = '';
 
-  /* Built-in (locked) sections */
+  /* Built-in sections — toggleable */
   var builtIn = [
     { key: 'svenska',  label: 'Svenska' },
     { key: 'matte',    label: 'Matte' },
@@ -1438,27 +1533,29 @@ function openSettings() {
   ];
 
   builtIn.forEach(function (s) {
+    var isHidden = hiddenSections.includes(s.key);
     var row = document.createElement('div');
-    row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:9px 13px; border:1px solid var(--border-solid); border-radius:var(--radius-sm); background:#faf9f7;';
-    row.innerHTML =
-      '<span style="font-family:var(--serif); font-style:italic; font-size:0.9rem; color:var(--text);">' + esc(s.label) + '</span>' +
-      '<span style="font-size:0.68rem; font-weight:500; color:var(--text-faint); letter-spacing:0.06em; text-transform:uppercase;">Inbyggt</span>';
+    row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:9px 13px; border:1px solid var(--border-solid); border-radius:var(--radius-sm); background:' + (isHidden ? '#f5f3ef' : '#faf9f7') + ';';
+
+    var labelEl = document.createElement('span');
+    labelEl.style.cssText = 'font-family:var(--serif); font-style:italic; font-size:0.9rem; color:' + (isHidden ? 'var(--text-faint)' : 'var(--text)') + '; text-decoration:' + (isHidden ? 'line-through' : 'none') + ';';
+    labelEl.textContent = s.label;
+
+    var togBtn = document.createElement('button');
+    togBtn.textContent = isHidden ? 'Visa' : 'Dölj';
+    togBtn.style.cssText = 'background:transparent; border:1px solid ' + (isHidden ? 'var(--green)' : 'var(--amber)') + '; border-radius:var(--radius-pill); padding:4px 11px; font-family:var(--sans); font-size:0.73rem; font-weight:500; color:' + (isHidden ? 'var(--green)' : 'var(--amber)') + '; cursor:pointer; white-space:nowrap; flex-shrink:0;';
+    togBtn.onclick = function () { toggleSection(s.key); };
+
+    row.appendChild(labelEl);
+    row.appendChild(togBtn);
     list.appendChild(row);
   });
 
-  /* Custom (deletable) sections — find all .col elements with custom_ sections */
+  /* Custom (deletable) sections */
   var customCols = document.querySelectorAll('.col[data-section^="custom_"]');
-  if (customCols.length === 0) {
-    var note = document.createElement('p');
-    note.style.cssText = 'font-size:0.8rem; color:var(--text-faint); margin-top:6px;';
-    note.textContent = 'Inga egna ämnen har skapats än.';
-    list.appendChild(note);
-    return;
-  }
-
   customCols.forEach(function (col) {
-    var section = col.dataset.section;
-    var label   = SECTION_LABELS[section] || section.replace('custom_', '');
+    var section  = col.dataset.section;
+    var label    = SECTION_LABELS[section] || section.replace('custom_', '');
     var appCount = col.querySelectorAll('.app-card').length;
 
     var row = document.createElement('div');
@@ -1480,6 +1577,37 @@ function openSettings() {
     row.appendChild(delBtn);
     list.appendChild(row);
   });
+
+  /* Dolda appar */
+  var hiddenAppObjs = PREINSTALLED_APPS.filter(function (a) { return hiddenApps.includes(a.id); });
+  if (hiddenAppObjs.length > 0) {
+    var divider = document.createElement('div');
+    divider.style.cssText = 'height:1px; background:var(--border-solid); margin:18px 0 10px;';
+    list.appendChild(divider);
+
+    var heading = document.createElement('p');
+    heading.style.cssText = 'font-size:0.71rem; font-weight:600; letter-spacing:0.09em; color:var(--text-mid); text-transform:uppercase; margin-bottom:10px;';
+    heading.textContent = 'Dolda appar';
+    list.appendChild(heading);
+
+    hiddenAppObjs.forEach(function (app) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:9px 13px; border:1px solid var(--border-solid); border-radius:var(--radius-sm); background:#f5f3ef;';
+
+      var labelEl = document.createElement('span');
+      labelEl.style.cssText = 'font-size:0.88rem; color:var(--text-faint);';
+      labelEl.textContent = (app.icon || '') + ' ' + app.title;
+
+      var restoreBtn = document.createElement('button');
+      restoreBtn.textContent = 'Återställ';
+      restoreBtn.style.cssText = 'background:transparent; border:1px solid var(--green); border-radius:var(--radius-pill); padding:4px 11px; font-family:var(--sans); font-size:0.73rem; font-weight:500; color:var(--green); cursor:pointer; white-space:nowrap; flex-shrink:0;';
+      restoreBtn.onclick = (function (id) { return function () { restoreApp(id); }; })(app.id);
+
+      row.appendChild(labelEl);
+      row.appendChild(restoreBtn);
+      list.appendChild(row);
+    });
+  }
 
   document.getElementById('settings-modal').classList.add('open');
 }
