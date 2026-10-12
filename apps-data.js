@@ -202,5 +202,17 @@ const PREINSTALLED_APPS = [
     "color": "green",
     "section": "natur",
     "sectionName": "Natur & teknik"
+  },
+  {
+    "id": "preinstalled_lararplanering",
+    "title": "Lärarplanering",
+    "icon": "📅",
+    "category": "Lärarverktyg",
+    "desc": "",
+    "url": "https://teacherplanner.ellinors.com",
+    "html": "",
+    "color": "purple",
+    "section": "lararverktyg",
+    "sectionName": "Lärarverktyg"
   }
 ];
