@@ -1284,8 +1284,10 @@ function restoreApp(id) {
    TOGGLE SECTION VISIBILITY
    ═══════════════════════════════════════════ */
 function toggleSection(key) {
-  var hidden = loadHiddenSections();
-  var idx    = hidden.indexOf(key);
+  var hidden    = loadHiddenSections();
+  var idx       = hidden.indexOf(key);
+  var isHiding  = idx === -1;
+  if (isHiding && !confirm('Vill du dölja ämnet "' + (SECTION_LABELS[key] || key) + '"? Du kan visa det igen via Inställningar.')) return;
   if (idx === -1) { hidden.push(key); } else { hidden.splice(idx, 1); }
   saveHiddenSections(hidden);
 
