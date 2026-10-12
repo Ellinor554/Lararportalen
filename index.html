@@ -982,7 +982,7 @@ body {
    ═══════════════════════════════════════════ */
 var STORAGE_KEY          = 'lararportalen_apps_v2';
 var HIDDEN_APPS_KEY      = 'lararportalen_hidden_apps_v1';
-var COLOR_OVERRIDES_KEY  = 'lararportalen_color_overrides_v1';
+var SECTION_COLORS_KEY   = 'lararportalen_section_colors_v1';
 var HIDDEN_SECTIONS_KEY = 'lararportalen_hidden_sections_v1';
 var selectedColor = 'green';
 var editingAppId  = null;
@@ -1141,8 +1141,8 @@ function loadHiddenSections() {
   catch (e) { return []; }
 }
 function saveHiddenSections(keys) { localStorage.setItem(HIDDEN_SECTIONS_KEY, JSON.stringify(keys)); }
-function loadColorOverrides()       { try { return JSON.parse(localStorage.getItem(COLOR_OVERRIDES_KEY)) || {}; } catch(e) { return {}; } }
-function saveColorOverrides(map)    { localStorage.setItem(COLOR_OVERRIDES_KEY, JSON.stringify(map)); }
+function loadSectionColors()      { try { return JSON.parse(localStorage.getItem(SECTION_COLORS_KEY)) || {}; } catch(e) { return {}; } }
+function saveSectionColors(map)   { localStorage.setItem(SECTION_COLORS_KEY, JSON.stringify(map)); }
 
 /* ═══════════════════════════════════════════
    RENDER ALL APPS ON PAGE LOAD
@@ -1208,8 +1208,8 @@ function findCardById(id) {
    ═══════════════════════════════════════════ */
 function appendCardToDOM(app, persist, isPreinstalled) {
   var hasHtml = app.html && app.html.trim().length > 0;
-  var overrides = loadColorOverrides();
-  var color   = overrides[app.id] || app.color || 'green';
+  var sectionColors = loadSectionColors();
+  var color   = sectionColors[app.section] || app.color || 'green';
   var icon    = (app.icon || '').trim() || '🌐';
 
   var card = document.createElement('div');
@@ -1275,14 +1275,13 @@ function hideApp(id) {
   }
 }
 
-function setAppColor(id, color) {
-  var overrides = loadColorOverrides();
-  overrides[id] = color;
-  saveColorOverrides(overrides);
-  var card = findCardById(id);
-  if (card) {
+function setSectionColor(section, color) {
+  var sectionColors = loadSectionColors();
+  sectionColors[section] = color;
+  saveSectionColors(sectionColors);
+  document.querySelectorAll('.app-card[data-section="' + section + '"]').forEach(function (card) {
     card.className = card.className.replace(/stripe-\w+/, 'stripe-' + color);
-  }
+  });
   closeSettings();
   setTimeout(openSettings, 50);
 }
@@ -1648,9 +1647,9 @@ function openSettings() {
     });
   }
 
-  /* Anpassa färger */
-  var colors = ['green','blue','amber','rose','teal','purple'];
-  var overrides = loadColorOverrides();
+  /* Anpassa färger per ämne */
+  var colors       = ['green','blue','amber','rose','teal','purple'];
+  var sectionColors = loadSectionColors();
 
   var colorDivider = document.createElement('div');
   colorDivider.style.cssText = 'height:1px; background:var(--border-solid); margin:18px 0 10px;';
@@ -1658,18 +1657,24 @@ function openSettings() {
 
   var colorHeading = document.createElement('p');
   colorHeading.style.cssText = 'font-size:0.71rem; font-weight:600; letter-spacing:0.09em; color:var(--text-mid); text-transform:uppercase; margin-bottom:10px;';
-  colorHeading.textContent = 'Anpassa färger';
+  colorHeading.textContent = 'Färg per ämne';
   list.appendChild(colorHeading);
 
-  var visibleApps = PREINSTALLED_APPS.filter(function (a) { return !hiddenApps.includes(a.id); });
-  visibleApps.forEach(function (app) {
-    var currentColor = overrides[app.id] || app.color || 'green';
+  var allSections = builtIn.concat(
+    Array.from(document.querySelectorAll('.col[data-section^="custom_"]')).map(function (col) {
+      var key = col.dataset.section;
+      return { key: key, label: SECTION_LABELS[key] || key.replace('custom_', '') };
+    })
+  );
+
+  allSections.forEach(function (s) {
+    var currentColor = sectionColors[s.key] || '';
     var row = document.createElement('div');
     row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:8px 13px; border:1px solid var(--border-solid); border-radius:var(--radius-sm); background:#faf9f7; gap:10px;';
 
     var labelEl = document.createElement('span');
-    labelEl.style.cssText = 'font-size:0.85rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;';
-    labelEl.textContent = (app.icon || '') + ' ' + app.title;
+    labelEl.style.cssText = 'font-family:var(--serif); font-style:italic; font-size:0.88rem; color:var(--text); flex-shrink:0;';
+    labelEl.textContent = s.label;
 
     var dots = document.createElement('div');
     dots.style.cssText = 'display:flex; gap:6px; flex-shrink:0;';
@@ -1677,7 +1682,7 @@ function openSettings() {
       var dot = document.createElement('span');
       dot.className = 'cp-dot dot-' + c + (c === currentColor ? ' selected' : '');
       dot.title = c;
-      dot.onclick = (function (appId, color) { return function () { setAppColor(appId, color); }; })(app.id, c);
+      dot.onclick = (function (key, color) { return function () { setSectionColor(key, color); }; })(s.key, c);
       dots.appendChild(dot);
     });
 
