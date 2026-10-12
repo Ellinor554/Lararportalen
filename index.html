@@ -1123,7 +1123,8 @@ function launchUrl(url) {
 }
 
 function launchStoredHtml(id) {
-  var app = loadApps().find(function (a) { return a.id === id; });
+  var app = PREINSTALLED_APPS.find(function (a) { return a.id === id; })
+         || loadApps().find(function (a) { return a.id === id; });
   if (app && app.html) launchHtml(app.html);
 }
 
