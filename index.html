@@ -1252,6 +1252,7 @@ function appendCardToDOM(app, persist, isPreinstalled) {
    HIDE / RESTORE PREINSTALLED APP
    ═══════════════════════════════════════════ */
 function hideApp(id) {
+  if (!confirm('Vill du dölja den här appen? Du kan visa den igen via Inställningar.')) return;
   var hidden = loadHiddenApps();
   if (!hidden.includes(id)) { hidden.push(id); saveHiddenApps(hidden); }
   var card = findCardById(id);
