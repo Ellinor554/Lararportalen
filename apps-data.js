@@ -214,5 +214,17 @@ const PREINSTALLED_APPS = [
     "color": "purple",
     "section": "lararverktyg",
     "sectionName": "Lärarverktyg"
+  },
+  {
+    "id": "preinstalled_matematikutforskaren",
+    "title": "Matematikutforskaren",
+    "icon": "🔢",
+    "category": "Matte",
+    "desc": "",
+    "url": "https://matematikutforskaren.ellinors.com",
+    "html": "",
+    "color": "blue",
+    "section": "matte",
+    "sectionName": "Matte"
   }
 ];
