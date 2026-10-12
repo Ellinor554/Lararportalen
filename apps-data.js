@@ -226,5 +226,17 @@ const PREINSTALLED_APPS = [
     "color": "blue",
     "section": "matte",
     "sectionName": "Matte"
+  },
+  {
+    "id": "preinstalled_floorplanner",
+    "title": "Floorplanner",
+    "icon": "🏠",
+    "category": "Teknik",
+    "desc": "",
+    "url": "https://ellinor554.github.io/floorplanner",
+    "html": "",
+    "color": "teal",
+    "section": "custom_Teknik",
+    "sectionName": "Teknik"
   }
 ];
