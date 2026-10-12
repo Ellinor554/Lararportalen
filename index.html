@@ -36,6 +36,8 @@
   --teal-pale:    #e6f2f2;
   --purple:       #7a6a9f;
   --purple-pale:  #eeebf7;
+  --grey:         #7a7a7a;
+  --grey-pale:    #f0efed;
   --radius:       14px;
   --radius-sm:    9px;
   --radius-pill:  999px;
@@ -437,6 +439,7 @@ body {
 .app-card.stripe-rose::before   { background: var(--rose); }
 .app-card.stripe-teal::before   { background: var(--teal); }
 .app-card.stripe-purple::before { background: var(--purple); }
+.app-card.stripe-grey::before   { background: var(--grey); }
 
 .app-card.stripe-green  { background: linear-gradient(160deg, var(--green-pale) 0%, #fff 60%); }
 .app-card.stripe-blue   { background: linear-gradient(160deg, var(--blue-pale)  0%, #fff 60%); }
@@ -444,6 +447,7 @@ body {
 .app-card.stripe-rose   { background: linear-gradient(160deg, var(--rose-pale)  0%, #fff 60%); }
 .app-card.stripe-teal   { background: linear-gradient(160deg, var(--teal-pale)  0%, #fff 60%); }
 .app-card.stripe-purple { background: linear-gradient(160deg, var(--purple-pale)0%, #fff 60%); }
+.app-card.stripe-grey   { background: linear-gradient(160deg, var(--grey-pale)  0%, #fff 60%); }
 
 .card-category {
   font-size: 0.67rem;
@@ -678,6 +682,7 @@ body {
 .dot-rose   { background: var(--rose); }
 .dot-teal   { background: var(--teal); }
 .dot-purple { background: var(--purple); }
+.dot-grey   { background: var(--grey); }
 
 .btn-cancel {
   background: transparent;
@@ -1648,7 +1653,7 @@ function openSettings() {
   }
 
   /* Anpassa färger per ämne */
-  var colors       = ['green','blue','amber','rose','teal','purple'];
+  var colors       = ['green','blue','amber','rose','teal','purple','grey'];
   var sectionColors = loadSectionColors();
 
   var colorDivider = document.createElement('div');
