@@ -284,9 +284,8 @@ body {
    ════════════════════════════════════════ */
 #board {
   display: flex;
-  gap: 20px;
+  gap: 14px;
   align-items: flex-start;
-  min-width: max-content;
   transition: opacity 0.18s ease;
 }
 
@@ -297,11 +296,11 @@ body {
    COLUMN
    ════════════════════════════════════════ */
 .col {
-  width: 230px;
+  flex: 1 1 0;
+  min-width: 150px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  flex-shrink: 0;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 .col.hidden {
@@ -719,7 +718,7 @@ body {
   :root { --sidebar-w: 130px; }
   #main { padding: 20px 16px 36px; }
   .site-title { font-size: 1.9rem; }
-  .col { width: 190px; }
+  .col { min-width: 140px; }
   .modal-box { padding: 28px 22px; }
 }
 </style>
