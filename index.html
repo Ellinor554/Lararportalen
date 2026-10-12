@@ -941,6 +941,7 @@ body {
 </div>
 
 
+<script src="apps-data.js"></script>
 <script>
 /* ═══════════════════════════════════════════
    CONSTANTS & STATE
@@ -951,15 +952,7 @@ var editingAppId  = null;
 var authenticated = false;
 var activeFilter  = 'all';   /* current sidebar filter */
 
-/* ─────────────────────────────────────────────
-   PREINSTALLED APPS
-   Paste your hardcoded apps here. These are
-   read-only: no delete button, never saved to
-   localStorage. Format matches the stored app
-   object: { id, title, icon, category, desc,
-   url, html, color, section, sectionName }
-   ───────────────────────────────────────────── */
-const PREINSTALLED_APPS = [];
+/* PREINSTALLED_APPS definieras i apps-data.js (laddas före detta skript) */
 
 var GRID_MAP = {
   svenska:  'grid-svenska',
@@ -1106,8 +1099,11 @@ function saveApps(apps) {
    localStorage apps (editable) on top.
    ═══════════════════════════════════════════ */
 function renderStoredApps() {
+  var preinstalledIds = PREINSTALLED_APPS.map(function (a) { return a.id; });
   PREINSTALLED_APPS.forEach(function (app) { appendCardToDOM(app, false, true); });
-  loadApps().forEach(function (app)        { appendCardToDOM(app, false, false); });
+  loadApps()
+    .filter(function (app) { return !preinstalledIds.includes(app.id); })
+    .forEach(function (app) { appendCardToDOM(app, false, false); });
   updateAllCounts();
 }
 
