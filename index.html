@@ -760,6 +760,10 @@ body {
       <span class="cat-dot"></span>
       <span class="cat-label">Naturvetenskap</span>
     </div>
+    <div class="sidebar-cat" data-filter="lararverktyg" onclick="applyFilter('lararverktyg', this)">
+      <span class="cat-dot"></span>
+      <span class="cat-label">Lärarverktyg</span>
+    </div>
 
     <!-- custom sections injected here by JS -->
     <div id="sidebar-custom-slot"></div>
@@ -845,6 +849,19 @@ body {
         </div>
       </div>
 
+      <!-- LÄRARVERKTYG -->
+      <div class="col" id="col-lararverktyg" data-section="lararverktyg">
+        <div class="col-header">
+          <span class="col-title">Lärarverktyg</span>
+          <span class="col-count" id="count-lararverktyg">0</span>
+        </div>
+        <div class="col-cards" id="grid-lararverktyg"></div>
+        <div class="col-empty visible" id="empty-lararverktyg">
+          <div class="col-empty-icon">📂</div>
+          <p>Inga verktyg tillagda i denna kategori än.</p>
+        </div>
+      </div>
+
     </div><!-- /board -->
 
     <!-- Global empty state -->
@@ -891,6 +908,7 @@ body {
         <option value="matte">Matte</option>
         <option value="engelska">Engelska</option>
         <option value="natur">Naturvetenskap</option>
+        <option value="lararverktyg">Lärarverktyg</option>
         <option value="ny">+ Ny sektion…</option>
       </select>
     </div>
@@ -974,17 +992,19 @@ var activeFilter  = 'all';   /* current sidebar filter */
 /* PREINSTALLED_APPS definieras i apps-data.js (laddas före detta skript) */
 
 var GRID_MAP = {
-  svenska:  'grid-svenska',
-  matte:    'grid-matte',
-  engelska: 'grid-engelska',
-  natur:    'grid-natur'
+  svenska:       'grid-svenska',
+  matte:         'grid-matte',
+  engelska:      'grid-engelska',
+  natur:         'grid-natur',
+  lararverktyg:  'grid-lararverktyg'
 };
 
 var SECTION_LABELS = {
-  svenska:  'Svenska',
-  matte:    'Matte',
-  engelska: 'Engelska',
-  natur:    'Naturvetenskap'
+  svenska:      'Svenska',
+  matte:        'Matte',
+  engelska:     'Engelska',
+  natur:        'Naturvetenskap',
+  lararverktyg: 'Lärarverktyg'
 };
 
 /* ═══════════════════════════════════════════
@@ -1526,10 +1546,11 @@ function openSettings() {
 
   /* Built-in sections — toggleable */
   var builtIn = [
-    { key: 'svenska',  label: 'Svenska' },
-    { key: 'matte',    label: 'Matte' },
-    { key: 'engelska', label: 'Engelska' },
-    { key: 'natur',    label: 'Naturvetenskap' }
+    { key: 'svenska',      label: 'Svenska' },
+    { key: 'matte',        label: 'Matte' },
+    { key: 'engelska',     label: 'Engelska' },
+    { key: 'natur',        label: 'Naturvetenskap' },
+    { key: 'lararverktyg', label: 'Lärarverktyg' }
   ];
 
   builtIn.forEach(function (s) {
