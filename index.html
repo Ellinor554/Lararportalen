@@ -1446,8 +1446,10 @@ function deleteAppInCategory(id) {
 }
 
 function openAddAppInCategory() {
+  var savedCatId = activeCategoryId;
   closeCategoryModal();
   openAddMenu();
+  activeCategoryId = savedCatId;  /* återställ efter closeCategoryModal nollat det */
   selectAddType('app');
   document.getElementById('addapp-title').textContent = '📁 Lägg till i mapp';
 }
