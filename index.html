@@ -666,48 +666,6 @@ body {
   background: #f7f5f0;
 }
 
-/* ════════════════════════════════════════
-   ADD-TYPE SELECTOR (App / Kategori / Ämne)
-   ════════════════════════════════════════ */
-.addtype-row { display:flex; gap:8px; margin-bottom:16px; }
-.addtype-btn {
-  flex:1; padding:8px 4px; border-radius:var(--radius-sm);
-  border:1px solid var(--border-solid); background:#faf9f7;
-  font-family:var(--sans); font-size:0.8rem; font-weight:500;
-  color:var(--text-mid); cursor:pointer;
-  transition:background 0.15s, border-color 0.15s, color 0.15s;
-}
-.addtype-btn:hover { background:var(--amber-pale); border-color:var(--amber); color:var(--text); }
-.addtype-btn.active { background:var(--amber-pale); border-color:var(--gold); color:var(--gold-dk); font-weight:600; }
-
-/* ════════════════════════════════════════
-   CATEGORY (FOLDER) CARD
-   ════════════════════════════════════════ */
-.category-card {
-  border:1.5px dashed var(--border-solid);
-  border-radius:var(--radius);
-  padding:11px 14px;
-  cursor:pointer;
-  display:flex; align-items:center; gap:10px;
-  background:rgba(0,0,0,0.025);
-  transition:background 0.18s, border-color 0.18s;
-  position:relative;
-}
-.category-card:hover { background:var(--amber-pale); border-color:var(--gold); }
-.category-card-icon { font-size:1.1rem; flex-shrink:0; }
-.category-card-name { font-family:var(--serif); font-style:italic; font-size:0.92rem; color:var(--text); flex:1; }
-.category-card-count { font-size:0.72rem; color:var(--text-faint); white-space:nowrap; }
-.category-card-delete {
-  position:absolute; top:7px; right:7px;
-  background:rgba(255,255,255,0.85); border:1px solid var(--border-solid);
-  border-radius:50%; width:18px; height:18px;
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; color:var(--text-faint); font-size:0.6rem;
-  opacity:0; transition:opacity 0.15s, color 0.15s;
-}
-.category-card:hover .category-card-delete { opacity:1; }
-.category-card-delete:hover { color:var(--rose); border-color:var(--rose); background:var(--rose-pale); }
-
 .color-picker { display: flex; gap: 9px; padding: 4px 0; }
 .cp-dot {
   width: 22px; height: 22px;
@@ -836,8 +794,8 @@ body {
           <span id="filter-badge-label">Svenska</span>
           <span style="font-size:0.7rem; opacity:0.6;">✕</span>
         </span>
-        <button class="btn-pill btn-pill-solid auth-only" onclick="openAddMenu()" style="display:none;">
-          <span class="btn-icon">+</span> Lägg till
+        <button class="btn-pill btn-pill-solid auth-only" onclick="openAddApp()" style="display:none;">
+          <span class="btn-icon">+</span> Lägg till app
         </button>
       </div>
     </div>
@@ -929,18 +887,10 @@ body {
 <div id="addapp-modal" class="modal-overlay">
   <div class="modal-box">
     <button class="modal-close" onclick="closeAddApp()">✕</button>
-    <h2 id="addapp-title">Lägg till</h2>
+    <h2 id="addapp-title">Lägg till app</h2>
+    <p class="modal-subtitle" id="addapp-subtitle">Fyll i uppgifterna och klistra in HTML-koden nedan.</p>
     <div class="modal-divider"></div>
 
-    <!-- Typväljare -->
-    <div class="addtype-row" id="addtype-selector">
-      <button class="addtype-btn active" id="addtype-app"     onclick="selectAddType('app')">App</button>
-      <button class="addtype-btn"        id="addtype-cat"     onclick="selectAddType('cat')">Kategori</button>
-      <button class="addtype-btn"        id="addtype-subject" onclick="selectAddType('subject')">Ämne</button>
-    </div>
-
-    <!-- APP-formulär (befintligt, oförändrat) -->
-    <div id="addapp-form">
     <div class="form-group">
       <label>Appens namn *</label>
       <input type="text" id="new-title" placeholder="t.ex. Mattespelet">
@@ -992,37 +942,9 @@ body {
       <input type="url" id="new-url" placeholder="https://...">
     </div>
 
-    </div><!-- /addapp-form -->
-
-    <!-- KATEGORI-formulär -->
-    <div id="addcat-form" style="display:none;">
-      <div class="form-group">
-        <label>Kategorinamn *</label>
-        <input type="text" id="new-cat-name" placeholder="t.ex. Algebra">
-      </div>
-      <div class="form-group">
-        <label>Under vilket ämne?</label>
-        <select id="new-cat-section">
-          <option value="lararverktyg">Lärarverktyg</option>
-          <option value="matte">Matematik</option>
-          <option value="engelska">Engelska</option>
-          <option value="natur">Naturvetenskap</option>
-          <option value="svenska">Svenska</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- ÄMNE-formulär -->
-    <div id="addsubject-form" style="display:none;">
-      <div class="form-group">
-        <label>Ämnets namn *</label>
-        <input type="text" id="new-subject-name" placeholder="t.ex. Historia">
-      </div>
-    </div>
-
     <div style="display:flex; gap:10px; margin-top:26px; justify-content:flex-end; align-items:center;">
       <button class="btn-cancel" onclick="closeAddApp()">Avbryt</button>
-      <button class="btn-pill btn-pill-solid" id="addapp-submit-btn" onclick="submitAddForm()">Spara app</button>
+      <button class="btn-pill btn-pill-solid" id="addapp-submit-btn" onclick="submitAddApp()">Spara app</button>
     </div>
   </div>
 </div>
@@ -1068,9 +990,6 @@ body {
 var STORAGE_KEY          = 'lararportalen_apps_v2';
 var HIDDEN_APPS_KEY      = 'lararportalen_hidden_apps_v1';
 var SECTION_COLORS_KEY   = 'lararportalen_section_colors_v1';
-var CATEGORIES_KEY       = 'lararportalen_categories_v1';
-var currentAddType       = 'app';
-var activeCategoryId     = null;
 var HIDDEN_SECTIONS_KEY = 'lararportalen_hidden_sections_v1';
 var selectedColor = 'green';
 var editingAppId  = null;
@@ -1231,8 +1150,6 @@ function loadHiddenSections() {
 function saveHiddenSections(keys) { localStorage.setItem(HIDDEN_SECTIONS_KEY, JSON.stringify(keys)); }
 function loadSectionColors()      { try { return JSON.parse(localStorage.getItem(SECTION_COLORS_KEY)) || {}; } catch(e) { return {}; } }
 function saveSectionColors(map)   { localStorage.setItem(SECTION_COLORS_KEY, JSON.stringify(map)); }
-function loadCategories()         { try { return JSON.parse(localStorage.getItem(CATEGORIES_KEY)) || []; } catch(e) { return []; } }
-function saveCategories(cats)     { localStorage.setItem(CATEGORIES_KEY, JSON.stringify(cats)); }
 
 /* ═══════════════════════════════════════════
    RENDER ALL APPS ON PAGE LOAD
@@ -1244,23 +1161,12 @@ function renderStoredApps() {
   var hiddenApps       = loadHiddenApps();
   var hiddenSections   = loadHiddenSections();
 
-  /* Rendera kategorimappar överst i varje kolumn */
-  loadCategories().forEach(function (cat) { appendCategoryCard(cat); });
-
-  /* Förinstallerade appar (aldrig i kategori) */
   PREINSTALLED_APPS
     .filter(function (app) { return !hiddenApps.includes(app.id); })
     .forEach(function (app) { appendCardToDOM(app, false, true); });
-
-  /* User-tillagda appar — hoppa över de som är i en kategori */
   loadApps()
-    .filter(function (app) {
-      return !preinstalledIds.includes(app.id)
-          && !hiddenApps.includes(app.id)
-          && !app.categoryId;
-    })
+    .filter(function (app) { return !preinstalledIds.includes(app.id) && !hiddenApps.includes(app.id); })
     .forEach(function (app) { appendCardToDOM(app, false, false); });
-
   updateAllCounts();
 
   hiddenSections.forEach(function (key) {
@@ -1351,186 +1257,6 @@ function appendCardToDOM(app, persist, isPreinstalled) {
     var activeEl = document.querySelector('.sidebar-cat.active');
     applyFilter(activeFilter, activeEl);
   }
-}
-
-/* ═══════════════════════════════════════════
-   CATEGORY CARDS
-   ═══════════════════════════════════════════ */
-function appendCategoryCard(cat) {
-  var grid = resolveGrid(cat.section, cat.sectionName || SECTION_LABELS[cat.section] || cat.section);
-  if (!grid) return;
-  var appsInCat = loadApps().filter(function (a) { return a.categoryId === cat.id; }).length;
-  var card = document.createElement('div');
-  card.className = 'category-card';
-  card.dataset.catId = cat.id;
-  card.dataset.section = cat.section;
-  card.innerHTML =
-    '<span class="category-card-icon">📁</span>' +
-    '<span class="category-card-name">' + esc(cat.name) + '</span>' +
-    '<span class="category-card-count">' + appsInCat + ' app' + (appsInCat !== 1 ? 'ar' : '') + '</span>' +
-    '<button class="category-card-delete auth-only" title="Ta bort mapp" onclick="deleteCategoryCard(event,\'' + cat.id + '\')">✕</button>';
-  card.addEventListener('click', function (e) {
-    if (!e.target.classList.contains('category-card-delete')) openCategory(cat.id);
-  });
-  grid.prepend(card);
-  updateCount(grid.id);
-}
-
-function deleteCategoryCard(e, id) {
-  e.stopPropagation();
-  var cat = loadCategories().find(function (c) { return c.id === id; });
-  var appsInCat = loadApps().filter(function (a) { return a.categoryId === id; }).length;
-  var msg = 'Ta bort mappen "' + (cat ? cat.name : id) + '"?';
-  if (appsInCat > 0) msg += '\n\nVarning: ' + appsInCat + ' app(ar) i mappen raderas också.';
-  if (!confirm(msg)) return;
-  saveCategories(loadCategories().filter(function (c) { return c.id !== id; }));
-  saveApps(loadApps().filter(function (a) { return a.categoryId !== id; }));
-  var el = document.querySelector('.category-card[data-cat-id="' + id + '"]');
-  if (el) { var grid = el.closest('.col-cards'); el.remove(); if (grid) updateCount(grid.id); }
-  updateAllCounts();
-}
-
-/* ═══════════════════════════════════════════
-   CATEGORY DETAIL MODAL
-   ═══════════════════════════════════════════ */
-function openCategory(id) {
-  var cat = loadCategories().find(function (c) { return c.id === id; });
-  if (!cat) return;
-  activeCategoryId = id;
-  document.getElementById('catdetail-title').textContent = '📁 ' + cat.name;
-  renderCategoryDetail(id);
-  document.getElementById('catdetail-modal').classList.add('open');
-}
-
-function renderCategoryDetail(id) {
-  var grid = document.getElementById('catdetail-grid');
-  grid.innerHTML = '';
-  var apps = loadApps().filter(function (a) { return a.categoryId === id; });
-  if (!apps.length) {
-    grid.innerHTML = '<p style="color:var(--text-faint); font-size:0.85rem;">Inga appar i den här mappen ännu.</p>';
-    return;
-  }
-  apps.forEach(function (app) {
-    var hasHtml = app.html && app.html.trim().length > 0;
-    var sectionColors = loadSectionColors();
-    var color = sectionColors[app.section] || app.color || 'green';
-    var row = document.createElement('div');
-    row.style.cssText = 'display:flex; align-items:center; gap:12px; padding:10px 13px; border:1px solid var(--border-solid); border-radius:var(--radius-sm); background:#faf9f7;';
-    row.innerHTML =
-      '<span style="font-size:1.2rem;">' + esc((app.icon||'').trim()||'🌐') + '</span>' +
-      '<span style="flex:1; font-family:var(--serif); font-style:italic; font-size:0.9rem; color:var(--text);">' + esc(app.title) + '</span>' +
-      (hasHtml
-        ? '<button class="btn-launch" style="padding:5px 12px; font-size:0.75rem;" onclick="launchStoredHtml(\'' + app.id + '\')">Öppna</button>'
-        : '<button class="btn-launch" style="padding:5px 12px; font-size:0.75rem;" onclick="launchUrl(\'' + esc(app.url||'#') + '\')">Öppna</button>') +
-      '<button class="auth-only" title="Ta bort" onclick="deleteAppInCategory(\'' + app.id + '\')" style="background:none;border:none;cursor:pointer;color:var(--text-faint);font-size:0.8rem;">✕</button>';
-    grid.appendChild(row);
-  });
-}
-
-function closeCategoryModal() {
-  document.getElementById('catdetail-modal').classList.remove('open');
-  activeCategoryId = null;
-}
-
-function deleteAppInCategory(id) {
-  if (!confirm('Ta bort appen?')) return;
-  saveApps(loadApps().filter(function (a) { return a.id !== id; }));
-  renderCategoryDetail(activeCategoryId);
-  /* Uppdatera räknaren på mappkortet */
-  var card = document.querySelector('.category-card[data-cat-id="' + activeCategoryId + '"]');
-  if (card) {
-    var countEl = card.querySelector('.category-card-count');
-    var n = loadApps().filter(function (a) { return a.categoryId === activeCategoryId; }).length;
-    if (countEl) countEl.textContent = n + ' app' + (n !== 1 ? 'ar' : '');
-  }
-}
-
-function openAddAppInCategory() {
-  var savedCatId = activeCategoryId;
-  closeCategoryModal();
-  openAddMenu();
-  activeCategoryId = savedCatId;  /* återställ efter closeCategoryModal nollat det */
-  selectAddType('app');
-  document.getElementById('addapp-title').textContent = '📁 Lägg till i mapp';
-}
-
-/* ═══════════════════════════════════════════
-   ADD-MENU: TYP-VÄLJARE
-   ═══════════════════════════════════════════ */
-function openAddMenu() {
-  editingAppId = null;
-  setModalEditState(false);
-  resetAddAppForm();
-  selectAddType('app');
-  /* Synka kategori-sektionsväljaren med custom-ämnen */
-  var catSel = document.getElementById('new-cat-section');
-  var appSel = document.getElementById('new-section');
-  Array.prototype.forEach.call(appSel.options, function (opt) {
-    if (opt.value !== 'ny' && !catSel.querySelector('option[value="' + opt.value + '"]')) {
-      var o = document.createElement('option');
-      o.value = opt.value; o.textContent = opt.textContent;
-      catSel.appendChild(o);
-    }
-  });
-  document.getElementById('addapp-modal').classList.add('open');
-}
-
-function selectAddType(type) {
-  currentAddType = type;
-  ['app','cat','subject'].forEach(function (t) {
-    document.getElementById('addtype-' + t).classList.toggle('active', t === type);
-  });
-  document.getElementById('addapp-form').style.display    = type === 'app'     ? '' : 'none';
-  document.getElementById('addcat-form').style.display    = type === 'cat'     ? '' : 'none';
-  document.getElementById('addsubject-form').style.display = type === 'subject' ? '' : 'none';
-  var labels = { app: 'Spara app', cat: 'Spara kategori', subject: 'Spara ämne' };
-  document.getElementById('addapp-submit-btn').textContent = labels[type];
-  var titles = { app: 'Lägg till', cat: 'Lägg till', subject: 'Lägg till' };
-  if (!editingAppId) document.getElementById('addapp-title').textContent = titles[type];
-}
-
-function submitAddForm() {
-  if (currentAddType === 'app')     submitAddApp();
-  else if (currentAddType === 'cat')     submitAddCategory();
-  else if (currentAddType === 'subject') submitAddSubject();
-}
-
-function submitAddCategory() {
-  var name    = document.getElementById('new-cat-name').value.trim();
-  var section = document.getElementById('new-cat-section').value;
-  if (!name) { alert('Ange ett namn för kategorin.'); return; }
-  var cat = {
-    id: 'cat_' + Date.now(),
-    name: name,
-    section: section,
-    sectionName: SECTION_LABELS[section] || section
-  };
-  var cats = loadCategories();
-  cats.push(cat);
-  saveCategories(cats);
-  appendCategoryCard(cat);
-  /* Om vi lade till från en öppen kategori, öppna den igen */
-  if (activeCategoryId) {
-    closeCategoryModal();
-    openCategory(activeCategoryId);
-  }
-  closeAddApp();
-  document.getElementById('new-cat-name').value = '';
-}
-
-function submitAddSubject() {
-  var name = document.getElementById('new-subject-name').value.trim();
-  if (!name) { alert('Ange ett namn för ämnet.'); return; }
-  /* Återanvänd befintlig ny-sektion-logik */
-  document.getElementById('new-title').value    = '_placeholder_';
-  document.getElementById('new-section').value  = 'ny';
-  document.getElementById('new-section-name').value = name;
-  /* resolveGrid skapar sektionen, vi behöver inte spara en app */
-  var section = 'custom_' + name;
-  resolveGrid(section, name);
-  closeAddApp();
-  document.getElementById('new-subject-name').value = '';
-  document.getElementById('new-title').value = '';
 }
 
 /* ═══════════════════════════════════════════
@@ -1699,9 +1425,11 @@ function resolveGrid(section, sectionName) {
    ADD APP MODAL
    ═══════════════════════════════════════════ */
 function setModalEditState(isEdit) {
-  document.getElementById('addapp-title').textContent = isEdit ? 'Redigera app' : 'Lägg till';
+  document.getElementById('addapp-title').textContent = isEdit ? 'Redigera app' : 'Lägg till app';
+  document.getElementById('addapp-subtitle').textContent = isEdit
+    ? 'Uppdatera ikon, färg och innehåll för appen.'
+    : 'Fyll i uppgifterna och klistra in HTML-koden nedan.';
   document.getElementById('addapp-submit-btn').textContent = isEdit ? 'Spara ändringar' : 'Spara app';
-  document.getElementById('addtype-selector').style.display = isEdit ? 'none' : '';
 }
 
 function resetAddAppForm() {
@@ -1714,7 +1442,12 @@ function resetAddAppForm() {
   document.querySelector('.cp-dot[data-color="green"]').classList.add('selected');
 }
 
-function openAddApp()  { openAddMenu(); }
+function openAddApp()  {
+  editingAppId = null;
+  setModalEditState(false);
+  resetAddAppForm();
+  document.getElementById('addapp-modal').classList.add('open');
+}
 
 function closeAddApp() {
   document.getElementById('addapp-modal').classList.remove('open');
@@ -1797,16 +1530,6 @@ function submitAddApp() {
     sectionName: (section === 'ny') ? newSecName : null
   };
 
-  /* Om vi lägger till från en kategorivy, koppla appen till mappen */
-  if (!editingAppId && activeCategoryId) {
-    var cat = loadCategories().find(function (c) { return c.id === activeCategoryId; });
-    if (cat) {
-      appPayload.categoryId = activeCategoryId;
-      appPayload.section    = cat.section;
-      appPayload.sectionName = cat.sectionName;
-    }
-  }
-
   if (editingAppId) {
     var apps = loadApps();
     var idx  = apps.findIndex(function (a) { return a.id === editingAppId; });
@@ -1826,32 +1549,12 @@ function submitAddApp() {
     var activeEl = document.querySelector('.sidebar-cat.active');
     applyFilter(activeFilter, activeEl);
   } else {
-    var savedCatId = appPayload.categoryId;
-    if (!savedCatId) {
-      appendCardToDOM(appPayload, true, false);
-    } else {
-      /* Spara utan att rendera i kolumnen — appen hör till en mapp */
-      var apps = loadApps();
-      apps.push(appPayload);
-      saveApps(apps);
-      /* Uppdatera räknaren på mappkortet */
-      var catCard = document.querySelector('.category-card[data-cat-id="' + savedCatId + '"]');
-      if (catCard) {
-        var countEl = catCard.querySelector('.category-card-count');
-        var n = apps.filter(function (a) { return a.categoryId === savedCatId; }).length;
-        if (countEl) countEl.textContent = n + ' app' + (n !== 1 ? 'ar' : '');
-      }
-    }
+    appendCardToDOM(appPayload, true, false);
   }
 
-  var returnCatId = activeCategoryId;
   closeAddApp();
-  if (returnCatId) openCategory(returnCatId);
 }
 
-document.getElementById('catdetail-modal').addEventListener('click', function (e) {
-  if (e.target === this) closeCategoryModal();
-});
 document.getElementById('addapp-modal').addEventListener('click', function (e) {
   if (e.target === this) closeAddApp();
 });
@@ -2097,20 +1800,5 @@ function esc(str) {
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 </script>
-
-<!-- ════════════════════════════════════════
-     CATEGORY DETAIL MODAL
-     ════════════════════════════════════════ -->
-<div id="catdetail-modal" class="modal-overlay">
-  <div class="modal-box" style="max-width:560px;">
-    <button class="modal-close" onclick="closeCategoryModal()">✕</button>
-    <h2 id="catdetail-title" style="font-family:var(--serif); font-style:italic;"></h2>
-    <div class="modal-divider"></div>
-    <div id="catdetail-grid" style="display:flex; flex-direction:column; gap:10px; margin-top:14px; max-height:55vh; overflow-y:auto;"></div>
-    <div style="margin-top:18px;">
-      <button class="btn-pill btn-pill-solid" onclick="openAddAppInCategory()">+ Lägg till app</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
